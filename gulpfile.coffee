@@ -7,6 +7,7 @@ header = require('gulp-header')
 rename = require('gulp-rename')
 bower = require('gulp-bower')
 gutil = require('gulp-util')
+wrap = require('gulp-wrap-umd')
 
 pkg = require('./package.json')
 banner = "/*! #{ pkg.name } #{ pkg.version } */\n"
@@ -31,11 +32,31 @@ gulp.task 'concat', ->
     .pipe(header(banner))
     .pipe(gulp.dest('./'))
 
+  gulp.src(['js/drop.js'])
+    .pipe(concat('drop-amd.js'))
+    .pipe(wrap({
+      namespace: 'Drop',
+      exports:   'Drop',
+      deps: [
+        name:       'tether',
+        globalName: 'Tether',
+        paramName:  'Tether'
+      ]
+    }))
+    .pipe(header(banner))
+    .pipe(gulp.dest('./'))
+
 gulp.task 'uglify', ->
   gulp.src('./drop.js')
     .pipe(uglify())
     .pipe(header(banner))
     .pipe(rename('drop.min.js'))
+    .pipe(gulp.dest('./'))
+
+  gulp.src('./drop-amd.js')
+    .pipe(uglify())
+    .pipe(header(banner))
+    .pipe(rename('drop-amd.min.js'))
     .pipe(gulp.dest('./'))
 
 gulp.task 'js', ->
